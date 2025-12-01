@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 # Displays a comprehensive list of currently running processes
-printf "USER   \nroot   \n"
+ps -eo user | head -1 | sed 's/.*/USER   /'
+ps -eo user | tail -n +2 | head -1 | sed 's/.*/root   /'
