@@ -1,0 +1,49 @@
+version: "3.9"
+
+# ── MT5 Trading Journal — backend stack ──────────────────────────────────────
+#
+#  Starts automatically after every system reboot via Docker's restart policy.
+#
+#  First run:
+#    docker compose up -d
+#
+#  Logs:
+#    docker compose logs -f api
+#
+#  Stop:
+#    docker compose down
+
+services:
+  api:
+    build: ./backend
+    container_name: mt5_journal_api
+    restart: always          # ← survives reboots and crashes automatically
+    ports:
+      - "8000:8000"
+    environment:
+      # SQLite by default — swap for DATABASE_URL=postgresql://... to use Postgres
+      DATABASE_URL: sqlite:////data/journal.db
+    volumes:
+      - journal_data:/data   # database lives here, persists across container restarts
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ── Uncomment to use PostgreSQL instead of SQLite ──────────────────────────
+  # db:
+  #   image: postgres:16-alpine
+  #   container_name: mt5_journal_db
+  #   restart: always
+  #   environment:
+  #     POSTGRES_DB: journal
+  #     POSTGRES_USER: journal
+  #     POSTGRES_PASSWORD: changeme
+  #   volumes:
+  #     - pg_data:/var/lib/postgresql/data
+
+volumes:
+  journal_data:
+  # pg_data:
